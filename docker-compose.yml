@@ -1,0 +1,27 @@
+version: '3'
+services:
+
+  python3-server:
+    restart: always
+    build: .
+    container_name: python3-server
+    working_dir: /app
+    tty: true
+    volumes:
+      - .:/app
+
+  postgresql-server:
+    image: postgres:13
+    container_name: psql13-server
+    ports:
+      - 65432:5432
+    volumes:
+      # - ./initdb.d:/docker-entrypoint-initdb.d
+      - pgdata:/var/lib/postgresql/data
+    environment:
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: password
+      POSTGRES_DB: tweets
+
+volumes:
+  pgdata:
