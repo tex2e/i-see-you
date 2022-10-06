@@ -25,17 +25,22 @@ conn = pg8000.connect(
 )
 cur = conn.cursor()
 
-sql = '''
+sql_select_tweets = '''
 SELECT tweet_id, (info::json->>'user')::json->>'name', info::json->>'text'
   FROM tex2e_github_io;
 '''
+sql_insert_posneg = '''
+INSERT INTO pos_neg(tweet_id, pos, neg, words)
+  VALUES(%s, %s, %s, %s)
+  ON CONFLICT DO NOTHING
+'''
 
-cur.execute(sql)
+cur.execute(sql_select_tweets)
 rows = cur.fetchall()
 
 for row in rows:
     print(row)
-    text = row[2]
+    tweet_id, name, text = row
 
     pos_neg_score = 0
     pos_words = []
@@ -58,5 +63,12 @@ for row in rows:
     words_count = token_i
     print('[+] score=%f, pos=%s, neg=%s, words=%d' % (pos_neg_score / words_count, pos_words, neg_words, words_count))
 
+    try:
+        cur.execute(sql_insert_posneg, (tweet_id, pos_words, neg_words, words_count))
+        conn.commit()
+    except Exception as e:
+        print(e)
+
 cur.close()
+conn.commit()
 conn.close()
