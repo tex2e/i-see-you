@@ -13,16 +13,23 @@
 
 ```bash
 docker-compose up -d
-docker-compose exec python3-server python src/main.py
+docker-compose exec python3-server python src/fetch_tweets.py
 ```
 
 ```sql
 USE tweets;
-DROP TABLE tex2e_github_io;
 CREATE TABLE tex2e_github_io (
     tweet_id VARCHAR(32) PRIMARY KEY,
     info JSON NOT NULL,
     created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
 )
+CREATE TABLE pos_neg (
+    tweet_id VARCHAR(32) PRIMARY KEY,
+    pos TEXT[] NOT NULL,
+    neg TEXT[] NOT NULL,
+    words INTEGER NOT NULL,
+    foreign key (tweet_id) references tex2e_github_io(tweet_id)
+)
 ```
 
+ツイートIDから元のTweetを見る場合のURL：`https://twitter.com/i/web/status/<ID>`
