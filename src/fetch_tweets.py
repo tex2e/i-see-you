@@ -24,10 +24,10 @@ conn = pg8000.connect(
 )
 cur = conn.cursor()
 
-sql = '''
+sql_insert = '''
 INSERT INTO tex2e_github_io(tweet_id, info, created_at)
   VALUES(%s, %s, current_timestamp)
-  ON CONFLICT DO NOTHING
+  ON CONFLICT (tweet_id) DO UPDATE SET info = %s;
 '''
 
 try:
@@ -35,12 +35,17 @@ try:
         tweet_id = result.id  # Tweetのidを取得
         tweet_info = result._json  # REST APIのデータ
 
+        if tweet_info['truncated'] == True:
+            # Replace truncated text to full text.
+            status = api.get_status(tweet_id, tweet_mode='extended')
+            tweet_info['text'] = status.full_text
+
         print('[+] tweet (%d)' % tweet_id)
-        print('  name=%s' % result._json['user']['name'])
-        print('  text=%s' % result._json['text'])
+        print('  name=%s' % tweet_info['user']['name'])
+        print('  text=%s' % tweet_info['text'])
         print('')
 
-        cur.execute(sql, (tweet_id, tweet_info))
+        cur.execute(sql_insert, (tweet_id, tweet_info, tweet_info))
     conn.commit()
 except Exception as e:
     print(e)

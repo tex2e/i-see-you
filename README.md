@@ -14,6 +14,7 @@
 ```bash
 docker-compose up -d
 docker-compose exec python3-server python src/fetch_tweets.py
+docker-compose exec python3-server python src/pos_neg_tweets.py
 ```
 
 ```sql
