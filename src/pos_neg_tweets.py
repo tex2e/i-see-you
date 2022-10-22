@@ -1,7 +1,7 @@
 
-from janome.tokenizer import Tokenizer
-import pandas as pd
-import pg8000
+from janome.tokenizer import Tokenizer  # pip install janome
+import pandas as pd  # pip install pandas
+import pg8000  # pip install pg8000
 
 ### 形態素解析器 ###
 tokenizer = Tokenizer()

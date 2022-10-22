@@ -1,6 +1,6 @@
 
 import json
-import requests
+import requests  # pip install requests
 import pg8000  # pip install pg8000
 
 
