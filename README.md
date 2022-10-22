@@ -11,25 +11,40 @@
 
 ### 開発者向け
 
+起動＆実行
 ```bash
 docker-compose up -d
 docker-compose exec python3-server python src/fetch_tweets.py
 docker-compose exec python3-server python src/pos_neg_tweets.py
+docker-compose exec python3-server python src/send_to_discord.py
 ```
 
+ビルド
+```
+docker-compose build python3-server
+docker-compose down
+docker-compose up -d
+```
+
+DDL (PostgreSQL)
 ```sql
-USE tweets;
-CREATE TABLE tex2e_github_io (
+CREATE DATABASE reputation;
+
+USE reputation;
+
+CREATE TABLE tweet_my_site (
     tweet_id VARCHAR(32) PRIMARY KEY,
     info JSON NOT NULL,
     created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
 )
-CREATE TABLE pos_neg (
+ALTER TABLE tweet_my_site ADD COLUMN checked BOOLEAN DEFAULT FALSE;
+
+CREATE TABLE tweet_my_site_pos_neg (
     tweet_id VARCHAR(32) PRIMARY KEY,
     pos TEXT[] NOT NULL,
     neg TEXT[] NOT NULL,
-    words INTEGER NOT NULL,
-    foreign key (tweet_id) references tex2e_github_io(tweet_id)
+    word_count INTEGER NOT NULL,
+    FOREIGN KEY (tweet_id) REFERENCES tweet_my_site(tweet_id)
 )
 ```
 

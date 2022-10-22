@@ -17,58 +17,61 @@ df_dic = df_dic.iloc[:,0:2]
 # 各名詞が辞書にあるか確認し、あれば感情とともに配列に格納
 
 ### DB接続 ###
-conn = pg8000.connect(
-    user='postgres',
-    host='psql13-server',
-    database='tweets',
-    password='password'
-)
+conn = pg8000.connect(user='postgres',
+                      host='psql13-server',
+                      database='reputation',
+                      password='password')
 cur = conn.cursor()
 
 sql_select_tweets = '''
-SELECT tweet_id, (info::json->>'user')::json->>'name', info::json->>'text'
-  FROM tex2e_github_io;
+SELECT TW.tweet_id, (info::json->>'user')::json->>'name', info::json->>'text'
+  FROM tweet_my_site AS TW
+  LEFT JOIN tweet_my_site_pos_neg AS PN ON PN.tweet_id = TW.tweet_id
+  WHERE PN.word_count IS NULL;
 '''
-sql_insert_posneg = '''
-INSERT INTO pos_neg(tweet_id, pos, neg, words)
+sql_insert_tweet_pos_neg = '''
+INSERT INTO tweet_my_site_pos_neg(tweet_id, pos, neg, word_count)
   VALUES(%s, %s, %s, %s)
   ON CONFLICT DO NOTHING
 '''
 
-cur.execute(sql_select_tweets)
-rows = cur.fetchall()
+try:
+    cur.execute(sql_select_tweets)
+    rows = cur.fetchall()
 
-for row in rows:
-    print(row)
-    tweet_id, name, text = row
+    for row in rows:
+        print(row)
+        tweet_id, name, text, *_ = row
 
-    pos_neg_score = 0
-    pos_words = []
-    neg_words = []
-    words_count = 0
+        pos_neg_score = 0
+        pos_words = []
+        neg_words = []
+        words_count = 0
 
-    for token_i, token in enumerate(tokenizer.tokenize(text), start=1):
-        # print(token.surface)
-        dict_word = df_dic[df_dic['名詞'] == token.surface]
-        if len(dict_word) == 0:
-            continue
-        token_type = dict_word.iloc[0]['感情']
-        if token_type == 'p':
-            pos_neg_score += 1
-            pos_words.append(token.surface)
-        elif token_type == 'n':
-            pos_neg_score -= 1
-            neg_words.append(token.surface)
+        for token_i, token in enumerate(tokenizer.tokenize(text), start=1):
+            # print(token.surface)
+            dict_word = df_dic[df_dic['名詞'] == token.surface]
+            if len(dict_word) == 0:
+                continue
+            token_type = dict_word.iloc[0]['感情']
+            if token_type == 'p':
+                pos_neg_score += 1
+                pos_words.append(token.surface)
+            elif token_type == 'n':
+                pos_neg_score -= 1
+                neg_words.append(token.surface)
 
-    words_count = token_i
-    print('[+] score=%f, pos=%s, neg=%s, words=%d' % (pos_neg_score / words_count, pos_words, neg_words, words_count))
+        words_count = token_i
+        print('[+] ----------------------------------------')
+        print('[+] score=%f, pos=%s, neg=%s, words=%d' % (pos_neg_score / words_count, pos_words, neg_words, words_count))
 
-    try:
-        cur.execute(sql_insert_posneg, (tweet_id, pos_words, neg_words, words_count))
-        conn.commit()
-    except Exception as e:
-        print(e)
+        try:
+            cur.execute(sql_insert_tweet_pos_neg, (tweet_id, pos_words, neg_words, words_count))
+            conn.commit()
+        except Exception as e:
+            print(e)
 
-cur.close()
-conn.commit()
-conn.close()
+finally:
+    cur.close()
+    conn.commit()
+    conn.close()

@@ -17,16 +17,14 @@ api = tweepy.API(auth)
 # リツイート以外を検索
 search_results = api.search_tweets(q="tex2e.github.io -filter:retweets", result_type="mixed", count=50)
 
-conn = pg8000.connect(
-    user='postgres',
-    host='psql13-server',
-    database='tweets',
-    password='password'
-)
+conn = pg8000.connect(user='postgres',
+                      host='psql13-server',
+                      database='reputation',
+                      password='password')
 cur = conn.cursor()
 
 sql_insert = '''
-INSERT INTO tex2e_github_io(tweet_id, info, created_at)
+INSERT INTO tweet_my_site(tweet_id, info, created_at)
   VALUES(%s, %s, current_timestamp)
   ON CONFLICT (tweet_id) DO UPDATE SET info = %s;
 '''
@@ -41,7 +39,7 @@ try:
             status = api.get_status(tweet_id, tweet_mode='extended')
             tweet_info['text'] = status.full_text
 
-        print('[+] tweet (%d)' % tweet_id)
+        print('[+] tweet (https://twitter.com/i/web/status/%s)' % tweet_id)
         print('  name=%s' % tweet_info['user']['name'])
         print('  text=%s' % tweet_info['text'])
         print('')
@@ -50,6 +48,6 @@ try:
     conn.commit()
 except Exception as e:
     print(e)
-
-cur.close()
-conn.close()
+finally:
+    cur.close()
+    conn.close()
