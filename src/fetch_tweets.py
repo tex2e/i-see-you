@@ -33,9 +33,9 @@ try:
             status = api.get_status(tweet_id, tweet_mode='extended')
             tweet_info['text'] = status.full_text
 
-        print('[+] tweet (https://twitter.com/i/web/status/%s)' % tweet_id)
-        print('  name=%s' % tweet_info['user']['name'])
-        print('  text=%s' % tweet_info['text'])
+        name = tweet_info['user']['name']
+        print('[+] tweet by %s (https://twitter.com/i/web/status/%s)' % (name, tweet_id))
+        print('%s' % tweet_info['text'])
         print('')
 
         cur.execute('''
