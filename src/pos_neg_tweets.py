@@ -23,20 +23,13 @@ conn = pg8000.connect(user='postgres',
                       password='password')
 cur = conn.cursor()
 
-sql_select_tweets = '''
-SELECT TW.tweet_id, (info::json->>'user')::json->>'name', info::json->>'text'
-  FROM tweet_my_site AS TW
-  LEFT JOIN tweet_my_site_pos_neg AS PN ON PN.tweet_id = TW.tweet_id
-  WHERE PN.word_count IS NULL;
-'''
-sql_insert_tweet_pos_neg = '''
-INSERT INTO tweet_my_site_pos_neg(tweet_id, pos, neg, word_count)
-  VALUES(%s, %s, %s, %s)
-  ON CONFLICT DO NOTHING
-'''
-
 try:
-    cur.execute(sql_select_tweets)
+    cur.execute('''
+    SELECT TW.tweet_id, (info::json->>'user')::json->>'name', info::json->>'text'
+        FROM tweet_my_site AS TW
+        LEFT JOIN tweet_my_site_pos_neg AS PN ON PN.tweet_id = TW.tweet_id
+        WHERE PN.word_count IS NULL;
+    ''')
     rows = cur.fetchall()
 
     for row in rows:
@@ -66,7 +59,11 @@ try:
         print('[+] score=%f, pos=%s, neg=%s, words=%d' % (pos_neg_score / words_count, pos_words, neg_words, words_count))
 
         try:
-            cur.execute(sql_insert_tweet_pos_neg, (tweet_id, pos_words, neg_words, words_count))
+            cur.execute('''
+            INSERT INTO tweet_my_site_pos_neg(tweet_id, pos, neg, word_count)
+                VALUES(%s, %s, %s, %s)
+                ON CONFLICT DO NOTHING
+            ''', (tweet_id, pos_words, neg_words, words_count))
             conn.commit()
         except Exception as e:
             print(e)

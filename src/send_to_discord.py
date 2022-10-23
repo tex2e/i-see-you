@@ -24,7 +24,7 @@ def send_msg_to_discord(msg: str, debug=True):
 def make_msg(tweet_id: str, name: str, text: str, pos: str, neg: str, word_count: int):
     score = len(pos) / word_count - len(neg) / word_count
     sign  = '+' if score >= 0 else '-'
-    res  = '[%s] score=%f, pos=%s, neg=%s\nhttps://twitter.com/i/web/status/%s\n' % (sign, score, pos, neg, tweet_id)
+    res   = '(%s) score=%f, pos=%s, neg=%s\nhttps://twitter.com/i/web/status/%s\n' % (sign, score, pos, neg, tweet_id)
     return res
 
 
@@ -34,19 +34,13 @@ conn = pg8000.connect(user='postgres',
                       password='password')
 cur = conn.cursor()
 
-sql_select_tweets = '''
-SELECT TW.tweet_id, (info::json->>'user')::json->>'name', info::json->>'text', pos, neg, word_count
-  FROM tweet_my_site AS TW
-  LEFT JOIN tweet_my_site_pos_neg AS PN ON PN.tweet_id = TW.tweet_id
-  WHERE TW.checked IS FALSE;
-'''
-
-sql_update_tweet_checked = '''
-UPDATE tweet_my_site SET checked = TRUE WHERE tweet_id = %s;
-'''
-
 try:
-    cur.execute(sql_select_tweets)
+    cur.execute('''
+    SELECT TW.tweet_id, (info::json->>'user')::json->>'name', info::json->>'text', pos, neg, word_count
+        FROM tweet_my_site AS TW
+        LEFT JOIN tweet_my_site_pos_neg AS PN ON PN.tweet_id = TW.tweet_id
+        WHERE TW.checked IS FALSE;
+    ''')
     rows = cur.fetchall()
 
     msgs: list[str] = []
@@ -60,7 +54,9 @@ try:
         msgs.append(msg)
 
         # 送信済みフラグをTrueで確定させる
-        cur.execute(sql_update_tweet_checked, (tweet_id,))
+        cur.execute('''
+        UPDATE tweet_my_site SET checked = TRUE WHERE tweet_id = %s;
+        ''', (tweet_id,))
 
     response = None
     for msg in msgs:

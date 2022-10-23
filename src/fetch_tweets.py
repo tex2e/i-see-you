@@ -23,12 +23,6 @@ conn = pg8000.connect(user='postgres',
                       password='password')
 cur = conn.cursor()
 
-sql_insert = '''
-INSERT INTO tweet_my_site(tweet_id, info, created_at)
-  VALUES(%s, %s, current_timestamp)
-  ON CONFLICT (tweet_id) DO UPDATE SET info = %s;
-'''
-
 try:
     for result in search_results:
         tweet_id = result.id  # Tweetのidを取得
@@ -44,8 +38,13 @@ try:
         print('  text=%s' % tweet_info['text'])
         print('')
 
-        cur.execute(sql_insert, (tweet_id, tweet_info, tweet_info))
+        cur.execute('''
+        INSERT INTO tweet_my_site(tweet_id, info, created_at)
+            VALUES(%s, %s, current_timestamp)
+            ON CONFLICT (tweet_id) DO UPDATE SET info = %s;
+        ''', (tweet_id, tweet_info, tweet_info))
     conn.commit()
+
 except Exception as e:
     print(e)
 finally:
