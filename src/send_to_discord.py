@@ -13,8 +13,8 @@ def send_msg_to_discord(msg: str, debug=True):
     main_content = {'content': msg}
 
     response = requests.post(webhook_url,
-                            json.dumps(main_content),
-                            headers={'Content-Type': 'application/json'})
+                             json.dumps(main_content),
+                             headers={'Content-Type': 'application/json'})
     if debug:
         print(response)
         print(response.text)
@@ -24,7 +24,8 @@ def send_msg_to_discord(msg: str, debug=True):
 def make_msg(tweet_id: str, name: str, text: str, pos: str, neg: str, word_count: int):
     score = len(pos) / word_count - len(neg) / word_count
     sign  = '+' if score >= 0 else '-'
-    res   = '(%s) score=%f, pos=%s, neg=%s\nhttps://twitter.com/i/web/status/%s\n' % (sign, score, pos, neg, tweet_id)
+    res   = '(%s) score=%f, pos=%s, neg=%s\nhttps://twitter.com/i/web/status/%s\n%s\n' \
+             % (sign, score, pos, neg, tweet_id, text)
     return res
 
 
