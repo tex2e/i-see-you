@@ -2,7 +2,7 @@ version: '3'
 services:
 
   python3-server:
-    restart: always
+    #restart: always
     build: .
     container_name: python3-server
     working_dir: /app

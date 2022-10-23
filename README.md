@@ -14,9 +14,9 @@
 起動＆実行
 ```bash
 docker-compose up -d
-docker-compose exec python3-server python src/fetch_tweets.py
-docker-compose exec python3-server python src/pos_neg_tweets.py
-docker-compose exec python3-server python src/send_to_discord.py
+docker-compose exec -T python3-server python src/fetch_tweets.py
+docker-compose exec -T python3-server python src/pos_neg_tweets.py
+docker-compose exec -T python3-server python src/send_to_discord.py
 ```
 
 ビルド（使用するライブラリの増加時などのみ）
