@@ -2,12 +2,12 @@
 # I-See-You
 
 ### 目的
-- Twitterで自分のブログやコンテンツに対してコメントしているツイートを収集し、フィードバックに活用する。
-    - 自分の記事に対する間違いの指摘や理解できなかったなどの感想をツイッターでつぶやくだけで終わっている人が見受けられるため。
-- 各ツイートに対してポシネガ判定をする。
-    - ネガティブ判定は早めに修正対応できるようにする。
-    - ポジティブ判定はどの記事やコンテンツの保守に注力すれば良いかの指針にする。
-- 検知した結果はDiscordで通知する。
+- Twitterで自分のブログやコンテンツに対するツイートを収集し、フィードバックに活用する
+    - 自分の記事への間違いの指摘や理解が困難などの感想をツイッターでつぶやくだけで終わる人が見受けられるため
+    - 各ツイートに対してポシネガ判定をする
+        - ネガティブ判定は早めに修正対応できるようにする
+        - ポジティブ判定はどの記事やコンテンツに注力するかの指針にできるようにする
+    - 検知したツイートはDiscordで通知する
 
 ### 開発者向け
 
@@ -19,7 +19,7 @@ docker-compose exec python3-server python src/pos_neg_tweets.py
 docker-compose exec python3-server python src/send_to_discord.py
 ```
 
-ビルド
+ビルド（使用するライブラリの増加時などのみ）
 ```
 docker-compose build python3-server
 docker-compose down
@@ -47,5 +47,7 @@ CREATE TABLE tweet_my_site_pos_neg (
     FOREIGN KEY (tweet_id) REFERENCES tweet_my_site(tweet_id)
 )
 ```
+
+### その他
 
 ツイートIDから元のTweetを見る場合のURL：`https://twitter.com/i/web/status/<ID>`
