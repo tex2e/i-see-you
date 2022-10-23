@@ -1,11 +1,14 @@
 
+import os
 import json
 import requests  # pip install requests
 import pg8000  # pip install pg8000
+from dotenv import load_dotenv # pip install python-dotenv
+load_dotenv()
 
 
 def send_msg_to_discord(msg: str, debug=True):
-    webhook_url = 'https://discord.com/api/webhooks/1033297217718587454/4fAlAto_dYs8A0LGv3eoDHCWRIuZS9o8GnKAHddPacZYfZljkE7S6XXCMYFQm0hniqw1'
+    webhook_url = os.getenv('discord_webhook_url')
 
     main_content = {'content': msg}
 
@@ -59,9 +62,9 @@ try:
         # 送信済みフラグをTrueで確定させる
         cur.execute(sql_update_tweet_checked, (tweet_id,))
 
-    print('----------------------')
     response = None
     for msg in msgs:
+        print('----------------------')
         print(msg)
         response = send_msg_to_discord(msg)
     else:
