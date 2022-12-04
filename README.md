@@ -48,6 +48,15 @@ CREATE TABLE tweet_my_site_pos_neg (
 )
 ```
 
+.envファイルの作成と秘密値の設定
+```
+consumer_api_key = 'xxxxxxxxxxxxxxxxxxxxxxxxx'
+consumer_api_secret_key = 'xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx'
+access_token = 'nnnnnnnnnn-xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx'
+access_token_secret = 'xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx'
+discord_webhook_url = 'https://discord.com/api/webhooks/nnnnn/xxxxxxxxxxxxx'
+```
+
 ### その他
 
 ツイートIDから元のTweetを見る場合のURL：`https://twitter.com/i/web/status/<ID>`
